@@ -24,5 +24,8 @@ class Repo:
     async def get_faculties(self) -> Sequence[Faculty]:
         return (await self.session.scalars(select(Faculty))).all()
 
+    async def get_groups(self) -> Sequence[Group]:
+        return (await self.session.scalars(select(Group))).all()
+
     async def get_groups_of_faculty(self, faculty_id: int) -> Sequence[Group]:
         return (await self.session.scalars(select(Group).where(Group.faculty_id == faculty_id))).all()
