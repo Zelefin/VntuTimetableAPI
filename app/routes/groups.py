@@ -3,6 +3,7 @@ from typing import Sequence, List, Dict
 from fastapi import APIRouter, Depends
 
 from app.db_session import get_session
+from app.utils import update_group_lessons
 from db.Repo import Repo
 from db.models import Lesson
 
@@ -43,3 +44,14 @@ async def get_group_timetable(group_id: int, repo: Repo = Depends(get_session)) 
         "firstWeek": first_week,
         "secondWeek": second_week,
     }}
+
+
+@group_router.post("/v0/groups")
+async def update_group_timetable(group_id: int, repo: Repo = Depends(get_session)) -> Dict:
+    if not await repo.check_group(group_id=group_id):
+        return {"message": "Group not found"}
+    try:
+        await update_group_lessons(group_id=group_id, session=repo.session)
+        return {"message": "Group lessons updated"}
+    except Exception as e:
+        return {"error": str(e)}
