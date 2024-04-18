@@ -7,9 +7,9 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     restart: always
-    ports:
-      - "127.0.0.1:5422:5422"
-    command: -p 5422
+    expose:
+      - "5423"
+    command: -p 5423
   api:
     build: .
     command: sh -c "alembic upgrade head && python3 -m uvicorn --host 0.0.0.0 main:app"
