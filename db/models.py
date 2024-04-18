@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import List
 
-from sqlalchemy import DateTime, ForeignKey, UUID
+from sqlalchemy import DateTime, ForeignKey, UUID, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -27,6 +27,7 @@ class Lesson(Base):
     date: Mapped[datetime] = mapped_column(DateTime)
     dow: Mapped[str] = mapped_column()
     week_num: Mapped[int] = mapped_column()
+    added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
 
     def to_json(self) -> dict:
         formatted_lesson: dict = {
@@ -42,6 +43,7 @@ class Lesson(Base):
             },
             "begin": self.begin.strftime('%H:%M'),
             "end": self.end.strftime('%H:%M'),
+            "added_at": self.added_at.strftime('%d/%m/%Y, %H:%M:%S'),
         }
 
         return formatted_lesson
@@ -52,6 +54,7 @@ class Teacher(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column()
     lessons: Mapped[List["Lesson"]] = relationship(back_populates="teacher")
+    added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
 
 
 class Group(Base):
@@ -61,6 +64,7 @@ class Group(Base):
     lessons: Mapped[List["Lesson"]] = relationship(back_populates="group")
     faculty_id: Mapped[int] = mapped_column(ForeignKey("faculties.id"))
     faculty: Mapped["Faculty"] = relationship(back_populates="groups")
+    added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
 
 
 class Faculty(Base):
@@ -68,6 +72,7 @@ class Faculty(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column()
     groups: Mapped[List["Group"]] = relationship(back_populates="faculty")
+    added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
 
     def __str__(self):
         return f"{self.__class__.__name__} --- {self.name} ({self.id})"
