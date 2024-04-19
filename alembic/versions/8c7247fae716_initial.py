@@ -1,8 +1,8 @@
-"""Initial
+"""initial
 
-Revision ID: 358e945feca9
+Revision ID: 8c7247fae716
 Revises: 
-Create Date: 2024-03-28 20:56:14.260082
+Create Date: 2024-04-19 18:50:19.230113
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '358e945feca9'
+revision: str = '8c7247fae716'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -23,17 +23,20 @@ def upgrade() -> None:
     op.create_table('faculties',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
+    sa.Column('added_at', sa.DateTime(timezone=True), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('teachers',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
+    sa.Column('added_at', sa.DateTime(timezone=True), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('groups',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('faculty_id', sa.Integer(), nullable=False),
+    sa.Column('added_at', sa.DateTime(timezone=True), nullable=False),
     sa.ForeignKeyConstraint(['faculty_id'], ['faculties.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -51,6 +54,7 @@ def upgrade() -> None:
     sa.Column('date', sa.DateTime(), nullable=False),
     sa.Column('dow', sa.String(), nullable=False),
     sa.Column('week_num', sa.Integer(), nullable=False),
+    sa.Column('added_at', sa.DateTime(timezone=True), nullable=False),
     sa.ForeignKeyConstraint(['group_id'], ['groups.id'], ),
     sa.ForeignKeyConstraint(['teacher_id'], ['teachers.id'], ),
     sa.PrimaryKeyConstraint('id')

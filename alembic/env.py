@@ -31,7 +31,7 @@ target_metadata = Base.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
-app_config: Config = load_config('.env')
+app_config: Config = load_config()
 
 config.set_main_option(name="sqlalchemy.url", value=make_connection_string(app_config.postgres))
 
