@@ -25,17 +25,50 @@ async def lifespan(_: FastAPI):
     logging.info("App started!")
     scheduler = AsyncIOScheduler(timezone="Europe/Kyiv")
     scheduler.start()
-    scheduler.add_job(update_faculties_table, trigger='cron', month='*', start_date=datetime.now(),
-                      kwargs={"session_factory": sa_sessionmaker(config.postgres)})
-    scheduler.add_job(update_groups_table, trigger='cron', month='*', start_date=datetime.now(),
-                      kwargs={"session_factory": sa_sessionmaker(config.postgres)})
+    
+    retry_faculties = scheduler.add_job(
+        update_faculties_table, trigger='interval', minutes=10, start_date=datetime.now(),
+        kwargs={"session_factory": sa_sessionmaker(config.postgres), "retry_task": None},
+    )
+    retry_faculties.kwargs["retry_task"] = retry_faculties
+    retry_faculties.pause()
+    
+    retry_groups = scheduler.add_job(
+        update_groups_table, trigger='interval', minutes=10, start_date=datetime.now(),
+        kwargs={"session_factory": sa_sessionmaker(config.postgres), "retry_task": None},
+    )
+    retry_faculties.kwargs["retry_task"] = retry_groups
+    retry_groups.pause()
+
+    # retry_teachers = ...
+    # retry_teachers.kwargs["retry_task"] = retry_teachers
+    # retry_teachers.pause()
+    
+    retry_groups_lessons = scheduler.add_job(
+        update_groups_lessons_table, trigger='interval', minutes=10, start_date=datetime.now(),
+        kwargs={"session_factory": sa_sessionmaker(config.postgres), "retry_task": None},
+    )
+    retry_groups_lessons.kwargs["retry_task"] = retry_groups_lessons
+    retry_groups_lessons.pause()
+    
+    scheduler.add_job(
+        update_faculties_table, trigger='cron', month='*', start_date=datetime.now(),
+        kwargs={"session_factory": sa_sessionmaker(config.postgres), "retry_task": retry_faculties},
+    )
+    scheduler.add_job(
+        update_groups_table, trigger='cron', month='*', start_date=datetime.now(),
+        kwargs={"session_factory": sa_sessionmaker(config.postgres), "retry_task": retry_groups},
+    )
     # Because by updating groups lessons table we also update teachers table
     # so, we don't really need this scheduled job
-    # scheduler.add_job(update_teachers_table, trigger='cron', hour=3, minute=0, start_date=datetime.now(),
-    #                   kwargs={"session_factory": sa_sessionmaker(config.postgres)})
-    scheduler.add_job(update_groups_lessons_table, trigger='cron', hour=3, minute=0, start_date=datetime.now(),
-                      kwargs={"session_factory": sa_sessionmaker(config.postgres)})
-
+    # scheduler.add_job(
+    #     update_teachers_table, trigger='cron', hour=3, minute=0, start_date=datetime.now(),
+    #     kwargs={"session_factory": sa_sessionmaker(config.postgres), "retry_task": retry_teachers},
+    # )
+    scheduler.add_job(
+        update_groups_lessons_table, trigger='cron', hour=3, minute=0, start_date=datetime.now(),
+        kwargs={"session_factory": sa_sessionmaker(config.postgres), "retry_task": retry_groups_lessons},
+    )
     yield
     scheduler.shutdown()
     logging.info("App stopped!")
