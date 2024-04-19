@@ -51,7 +51,7 @@ async def update_group_timetable(group_id: int, repo: Repo = Depends(get_session
     if not await repo.check_group(group_id=group_id):
         return {"message": "Group not found"}
     try:
-        await update_group_lessons(group_id=group_id, session=repo.session)
+        await update_group_lessons(group_id=group_id, repo=repo)
         return {"message": "Group lessons updated"}
     except Exception as e:
         return {"error": str(e)}
