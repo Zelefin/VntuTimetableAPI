@@ -1,5 +1,7 @@
 import logging
+from datetime import datetime
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -8,12 +10,34 @@ from contextlib import asynccontextmanager
 from app.logging_cfg import InterceptHandler
 from app.routes.groups import group_router
 from app.routes.faculties import faculty_router
+from app.scheduled_tasks import (
+    update_faculties_table,
+    update_groups_table,
+    update_groups_lessons_table
+)
+from configreader import Config, load_config
+from db.db import sa_sessionmaker
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    config: Config = load_config()
     logging.info("App started!")
+    scheduler = AsyncIOScheduler(timezone="Europe/Kyiv")
+    scheduler.start()
+    scheduler.add_job(update_faculties_table, trigger='cron', month='*', start_date=datetime.now(),
+                      kwargs={"session_factory": sa_sessionmaker(config.postgres)})
+    scheduler.add_job(update_groups_table, trigger='cron', month='*', start_date=datetime.now(),
+                      kwargs={"session_factory": sa_sessionmaker(config.postgres)})
+    # Because by updating groups lessons table we also update teachers table
+    # so, we don't really need this scheduled job
+    # scheduler.add_job(update_teachers_table, trigger='cron', hour=3, minute=0, start_date=datetime.now(),
+    #                   kwargs={"session_factory": sa_sessionmaker(config.postgres)})
+    scheduler.add_job(update_groups_lessons_table, trigger='cron', hour=3, minute=0, start_date=datetime.now(),
+                      kwargs={"session_factory": sa_sessionmaker(config.postgres)})
+
     yield
+    scheduler.shutdown()
     logging.info("App stopped!")
 
 
