@@ -6,7 +6,7 @@ from redis.asyncio import Redis
 
 from app.db_session import get_session
 from app.redis_session import get_redis
-from app.utils import update_group_lessons
+from app.utils import update_group_lessons, update_groups, update_teachers
 from db.Repo import Repo
 from db.models import Lesson
 
@@ -57,12 +57,23 @@ async def get_group_timetable(
     return {"cached": False, "data": response}
 
 
-@group_router.post("/v0/groups")
+@group_router.post("/v0/groups/{group_id}")
 async def update_group_timetable(group_id: int, repo: Repo = Depends(get_session)) -> Dict:
     if not await repo.check_group(group_id=group_id):
         return {"message": "Group not found"}
     try:
+        await update_teachers(repo=repo)
         await update_group_lessons(group_id=group_id, repo=repo)
         return {"message": "Group lessons updated"}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@group_router.post("/v0/groups")
+async def update_groups_request(repo: Repo = Depends(get_session)) -> Dict:
+    try:
+        faculties: list[int] = [faculty.id for faculty in await repo.get_faculties()]
+        await update_groups(repo=repo, faculties=faculties)
+        return {"message": "Groups list updated"}
     except Exception as e:
         return {"error": str(e)}
