@@ -9,8 +9,15 @@ class Postgres(BaseSettings):
     password: str
 
 
+class Redis(BaseSettings):
+    host: str
+    port: int
+    db: int
+
+
 class Config(BaseSettings):
     postgres: Postgres
+    redis: Redis
 
     class Config:
         env_file = ".env"
