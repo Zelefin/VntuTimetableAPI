@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import Sequence, List, Dict
 
 from fastapi import APIRouter, Depends
@@ -6,7 +7,7 @@ from redis.asyncio import Redis
 
 from app.db_session import get_session
 from app.redis_session import get_redis
-from app.utils import update_group_lessons, update_groups, update_teachers
+from app.utils import update_group_lessons, update_groups
 from db.Repo import Repo
 from db.models import Lesson
 
@@ -62,10 +63,10 @@ async def update_group_timetable(group_id: int, repo: Repo = Depends(get_session
     if not await repo.check_group(group_id=group_id):
         return {"message": "Group not found"}
     try:
-        await update_teachers(repo=repo)
         await update_group_lessons(group_id=group_id, repo=repo)
         return {"message": "Group lessons updated"}
     except Exception as e:
+        logging.exception(e)
         return {"error": str(e)}
 
 
@@ -76,4 +77,5 @@ async def update_groups_request(repo: Repo = Depends(get_session)) -> Dict:
         await update_groups(repo=repo, faculties=faculties)
         return {"message": "Groups list updated"}
     except Exception as e:
+        logging.exception(e)
         return {"error": str(e)}
