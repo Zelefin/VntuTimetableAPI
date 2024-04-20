@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   db:
-    image: postgres:latest
+    image: postgres:alpine
     env_file:
       - ./.env
     volumes:
@@ -10,6 +10,14 @@ services:
     expose:
       - "5423"
     command: -p 5423
+  redis:
+    image: redis:alpine
+    volumes:
+      - cache:/data
+    restart: always
+    expose:
+      - "6379"
+    command: redis-server
   api:
     build: .
     command: sh -c "alembic upgrade head && python3 -m uvicorn --host 0.0.0.0 main:app"
@@ -20,6 +28,9 @@ services:
     restart: always
     depends_on:
       - db
+      - redis
 
 volumes:
   pgdata:
+  cache:
+    driver: local
