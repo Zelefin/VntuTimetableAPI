@@ -11,6 +11,7 @@ from contextlib import asynccontextmanager
 from app.logging_cfg import InterceptHandler
 from app.routes.groups import group_router
 from app.routes.faculties import faculty_router
+from app.routes.teachers import teachers_router
 from app.scheduled_tasks import (
     update_faculties_table,
     update_groups_table,
@@ -59,7 +60,7 @@ async def lifespan(_: FastAPI):
         kwargs={"session_factory": sa_sessionmaker(config.postgres), "retry_task": retry_faculties},
     )
     scheduler.add_job(
-        update_groups_table, trigger='cron', month='*', start_date=datetime.now(),
+        update_groups_table, trigger='cron', month='*', hour=1, start_date=datetime.now(),
         kwargs={"session_factory": sa_sessionmaker(config.postgres), "retry_task": retry_groups},
     )
     # Because by updating groups lessons table we also update teachers table
@@ -80,6 +81,7 @@ async def lifespan(_: FastAPI):
 app = FastAPI(lifespan=lifespan)
 app.include_router(router=group_router)
 app.include_router(router=faculty_router)
+app.include_router(router=teachers_router)
 # For handling errors
 logging.basicConfig(handlers=[InterceptHandler()], level=0, force=True)
 
@@ -96,4 +98,4 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    return {"message": "Welcome to VNTU timetable API"}
