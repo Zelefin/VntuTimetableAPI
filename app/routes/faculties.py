@@ -6,6 +6,7 @@ from redis.asyncio import Redis
 
 from app.db_session import get_session
 from app.redis_session import get_redis
+from app.utils import update_faculties
 from db.Repo import Repo
 from db.models import Faculty
 
@@ -34,3 +35,12 @@ async def get_faculties_with_groups(repo: Repo = Depends(get_session), redis: Re
     await redis.set(name='faculties_list', value=json.dumps(response), ex=3600)
 
     return {"cached": False, "data": response}
+
+
+@faculty_router.post("/v0/faculties")
+async def update_faculties_request(repo: Repo = Depends(get_session)) -> Dict:
+    try:
+        await update_faculties(repo=repo)
+        return {"message": "Faculties list updated"}
+    except Exception as e:
+        return {"error": str(e)}
