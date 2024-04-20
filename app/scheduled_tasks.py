@@ -23,7 +23,7 @@ async def update_groups_table(session_factory: sessionmaker, retry_task: Job) ->
     try:
         async with session_factory() as session:
             repo: Repo = Repo(session=session)
-            faculties: list[int] = [faculty.id for faculty in await Repo(session=session).get_faculties()]
+            faculties: list[int] = [faculty.id for faculty in await repo.get_faculties()]
             await update_groups(repo=repo, faculties=faculties)
         retry_task.pause()
     except Exception as e:
@@ -51,7 +51,7 @@ async def update_groups_lessons_table(session_factory: sessionmaker, retry_task:
             # we can't skip updating teachers, because each lesson has relationship with teacher
             # if there is lesson with new teacher it will cause exception
             await update_teachers(repo=repo)
-            groups_ids: list[int] = [group.id for group in await Repo(session=session).get_groups()]
+            groups_ids: list[int] = [group.id for group in await repo.get_groups()]
             await update_groups_lessons(repo=repo, groups_ids=groups_ids)
         retry_task.pause()
     except Exception as e:
