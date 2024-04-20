@@ -1,6 +1,7 @@
 import logging
 from datetime import datetime
 
+from apscheduler.job import Job
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,31 +27,33 @@ async def lifespan(_: FastAPI):
     scheduler = AsyncIOScheduler(timezone="Europe/Kyiv")
     scheduler.start()
     
-    retry_faculties = scheduler.add_job(
+    retry_faculties: Job = scheduler.add_job(
         update_faculties_table, trigger='interval', minutes=10, start_date=datetime.now(),
         kwargs={"session_factory": sa_sessionmaker(config.postgres), "retry_task": None},
     )
     retry_faculties.kwargs["retry_task"] = retry_faculties
     retry_faculties.pause()
     
-    retry_groups = scheduler.add_job(
+    retry_groups: Job = scheduler.add_job(
         update_groups_table, trigger='interval', minutes=10, start_date=datetime.now(),
         kwargs={"session_factory": sa_sessionmaker(config.postgres), "retry_task": None},
     )
     retry_faculties.kwargs["retry_task"] = retry_groups
     retry_groups.pause()
 
-    # retry_teachers = ...
+    # retry_teachers: Job = ...
     # retry_teachers.kwargs["retry_task"] = retry_teachers
     # retry_teachers.pause()
     
-    retry_groups_lessons = scheduler.add_job(
+    retry_groups_lessons: Job = scheduler.add_job(
         update_groups_lessons_table, trigger='interval', minutes=10, start_date=datetime.now(),
         kwargs={"session_factory": sa_sessionmaker(config.postgres), "retry_task": None},
     )
     retry_groups_lessons.kwargs["retry_task"] = retry_groups_lessons
     retry_groups_lessons.pause()
-    
+
+    # Main tasks
+
     scheduler.add_job(
         update_faculties_table, trigger='cron', month='*', start_date=datetime.now(),
         kwargs={"session_factory": sa_sessionmaker(config.postgres), "retry_task": retry_faculties},
@@ -66,7 +69,7 @@ async def lifespan(_: FastAPI):
     #     kwargs={"session_factory": sa_sessionmaker(config.postgres), "retry_task": retry_teachers},
     # )
     scheduler.add_job(
-        update_groups_lessons_table, trigger='cron', hour=3, minute=0, start_date=datetime.now(),
+        update_groups_lessons_table, trigger='cron', hour=3, start_date=datetime.now(),
         kwargs={"session_factory": sa_sessionmaker(config.postgres), "retry_task": retry_groups_lessons},
     )
     yield
