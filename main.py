@@ -56,11 +56,11 @@ async def lifespan(_: FastAPI):
     # Main tasks
 
     scheduler.add_job(
-        update_faculties_table, trigger='cron', month='*', start_date=datetime.now(),
+        update_faculties_table, trigger='cron', day=1, start_date=datetime.now(),
         kwargs={"session_factory": sa_sessionmaker(config.postgres), "retry_task": retry_faculties},
     )
     scheduler.add_job(
-        update_groups_table, trigger='cron', month='*', hour=1, start_date=datetime.now(),
+        update_groups_table, trigger='cron', day=1, hour=1, start_date=datetime.now(),
         kwargs={"session_factory": sa_sessionmaker(config.postgres), "retry_task": retry_groups},
     )
     # Because by updating groups lessons table we also update teachers table
