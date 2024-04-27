@@ -26,7 +26,6 @@ class Lesson(Base):
     teacher: Mapped["Teacher"] = relationship(back_populates="lessons")
     begin: Mapped[datetime] = mapped_column(DateTime)
     end: Mapped[datetime] = mapped_column(DateTime)
-    date: Mapped[datetime] = mapped_column(DateTime)
     dow: Mapped[str] = mapped_column()
     week_num: Mapped[int] = mapped_column()
     added_at: Mapped[datetime] = mapped_column(
@@ -35,7 +34,6 @@ class Lesson(Base):
 
     def to_json(self) -> dict:
         formatted_lesson: dict = {
-            "date": self.date.strftime("%d.%m"),
             "num": self.num,
             "auditory": self.auditory,
             "type": self.type,
