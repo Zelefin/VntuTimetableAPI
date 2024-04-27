@@ -8,6 +8,7 @@ from redis.asyncio import Redis
 from app.db_session import get_session
 from app.redis_session import get_redis
 from app.utils import update_group_lessons, update_groups
+from app.misc.gen_date import gen_weeks_dates
 from db.Repo import Repo
 from db.models import Lesson
 
@@ -43,11 +44,14 @@ async def get_group_timetable(
         return {"cached": True, "data": json.loads(cached_response)}
 
     lessons: Sequence[Lesson] = await repo.get_group_lessons(group_id=group_id)
+    first_week_dates, second_week_dates = gen_weeks_dates()
     first_week: List[Dict[str, str | List]] = [
-        {"day": day, "lessons": []} for day in days_dict
+        {"day": day_name, "date": first_week_dates[day_num], "lessons": []}
+        for day_name, day_num in days_dict.items()
     ]  # 7 days of the week
     second_week: List[Dict[str, str | List]] = [
-        {"day": day, "lessons": []} for day in days_dict
+        {"day": day_name, "date": second_week_dates[day_num], "lessons": []}
+        for day_name, day_num in days_dict.items()
     ]  # 7 days of the week
     for lesson in lessons:
         if lesson.week_num == 1:
