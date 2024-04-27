@@ -11,8 +11,10 @@ class Base(DeclarativeBase):
 
 
 class Lesson(Base):
-    __tablename__ = 'lessons'
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    __tablename__ = "lessons"
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
     group_id: Mapped[int] = mapped_column(ForeignKey("groups.id"))
     group: Mapped["Group"] = relationship(back_populates="lessons")
     num: Mapped[int] = mapped_column()
@@ -27,11 +29,13 @@ class Lesson(Base):
     date: Mapped[datetime] = mapped_column(DateTime)
     dow: Mapped[str] = mapped_column()
     week_num: Mapped[int] = mapped_column()
-    added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
+    added_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )
 
     def to_json(self) -> dict:
         formatted_lesson: dict = {
-            "date": self.date.strftime('%d.%m'),
+            "date": self.date.strftime("%d.%m"),
             "num": self.num,
             "auditory": self.auditory,
             "type": self.type,
@@ -41,38 +45,44 @@ class Lesson(Base):
                 "id": self.teacher.id,
                 "name": self.teacher.name,
             },
-            "begin": self.begin.strftime('%H:%M'),
-            "end": self.end.strftime('%H:%M'),
-            "added_at": self.added_at.strftime('%d/%m/%Y, %H:%M:%S'),
+            "begin": self.begin.strftime("%H:%M"),
+            "end": self.end.strftime("%H:%M"),
+            "added_at": self.added_at.strftime("%d/%m/%Y, %H:%M:%S"),
         }
 
         return formatted_lesson
 
 
 class Teacher(Base):
-    __tablename__ = 'teachers'
+    __tablename__ = "teachers"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column()
     lessons: Mapped[List["Lesson"]] = relationship(back_populates="teacher")
-    added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
+    added_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )
 
 
 class Group(Base):
-    __tablename__ = 'groups'
+    __tablename__ = "groups"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column()
     lessons: Mapped[List["Lesson"]] = relationship(back_populates="group")
     faculty_id: Mapped[int] = mapped_column(ForeignKey("faculties.id"))
     faculty: Mapped["Faculty"] = relationship(back_populates="groups")
-    added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
+    added_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )
 
 
 class Faculty(Base):
-    __tablename__ = 'faculties'
+    __tablename__ = "faculties"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column()
     groups: Mapped[List["Group"]] = relationship(back_populates="faculty")
-    added_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
+    added_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=func.now()
+    )
 
     def __str__(self):
         return f"{self.__class__.__name__} --- {self.name} ({self.id})"

@@ -25,9 +25,9 @@ days_dict: Dict[str, int] = {
 
 @group_router.get("/v0/groups/{group_id}")
 async def get_group_timetable(
-        group_id: int,
-        repo: Repo = Depends(get_session),
-        redis: Redis = Depends(get_redis),
+    group_id: int,
+    repo: Repo = Depends(get_session),
+    redis: Redis = Depends(get_redis),
 ) -> Dict:
     """
     Returns timetable for the given group. First and second week
@@ -43,8 +43,12 @@ async def get_group_timetable(
         return {"cached": True, "data": json.loads(cached_response)}
 
     lessons: Sequence[Lesson] = await repo.get_group_lessons(group_id=group_id)
-    first_week: List[Dict[str, str | List]] = [{"day": day, "lessons": []} for day in days_dict]  # 7 days of the week
-    second_week: List[Dict[str, str | List]] = [{"day": day, "lessons": []} for day in days_dict]  # 7 days of the week
+    first_week: List[Dict[str, str | List]] = [
+        {"day": day, "lessons": []} for day in days_dict
+    ]  # 7 days of the week
+    second_week: List[Dict[str, str | List]] = [
+        {"day": day, "lessons": []} for day in days_dict
+    ]  # 7 days of the week
     for lesson in lessons:
         if lesson.week_num == 1:
             # sorry mypy, but that's for sure a list
@@ -59,7 +63,9 @@ async def get_group_timetable(
 
 
 @group_router.post("/v0/groups/{group_id}")
-async def update_group_timetable(group_id: int, repo: Repo = Depends(get_session)) -> Dict:
+async def update_group_timetable(
+    group_id: int, repo: Repo = Depends(get_session)
+) -> Dict:
     if not await repo.check_group(group_id=group_id):
         return {"message": "Group not found"}
     try:

@@ -10,5 +10,7 @@ config: Config = load_config()
 
 
 async def get_redis() -> AsyncGenerator[Redis, None]:
-    redis: Redis = aioredis.from_url(f"redis://{config.redis.host}:{config.redis.port}/{config.redis.db}")
+    redis: Redis = aioredis.from_url(
+        f"redis://{config.redis.host}:{config.redis.port}/{config.redis.db}"
+    )
     yield redis

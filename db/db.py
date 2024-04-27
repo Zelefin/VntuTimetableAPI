@@ -5,9 +5,7 @@ from configreader import Postgres
 
 
 def make_connection_string(db: Postgres, async_fallback: bool = False) -> str:
-    result = (
-        f"postgresql+asyncpg://{db.user}:{db.password}@{db.host}:{db.port}/{db.db}"
-    )
+    result = f"postgresql+asyncpg://{db.user}:{db.password}@{db.host}:{db.port}/{db.db}"
     if async_fallback:
         result += "?async_fallback=True"
     return result

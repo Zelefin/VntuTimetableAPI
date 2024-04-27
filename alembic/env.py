@@ -33,7 +33,9 @@ target_metadata = Base.metadata
 
 app_config: Config = load_config()
 
-config.set_main_option(name="sqlalchemy.url", value=make_connection_string(app_config.postgres))
+config.set_main_option(
+    name="sqlalchemy.url", value=make_connection_string(app_config.postgres)
+)
 
 
 def run_migrations_offline() -> None:
