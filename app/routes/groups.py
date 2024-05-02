@@ -4,10 +4,11 @@ from typing import Sequence, List, Dict
 
 from fastapi import APIRouter, Depends
 from redis.asyncio import Redis
+from sqlalchemy.exc import IntegrityError
 
 from app.db_session import get_session
 from app.redis_session import get_redis
-from app.utils import update_group_lessons, update_groups
+from app.utils import update_group_lessons, update_groups_lessons, update_teachers
 from app.misc.gen_date import gen_weeks_dates
 from db.Repo import Repo
 from db.models import Lesson
@@ -61,19 +62,29 @@ async def get_group_timetable(
             second_week[days_dict[lesson.dow]]["lessons"].append(lesson.to_json())  # type: ignore
 
     response = {"firstWeek": first_week, "secondWeek": second_week}
-    await redis.set(str(group_id), json.dumps(response), ex=3600)
+    await redis.set(str(group_id), json.dumps(response), ex=10_800)
 
     return {"cached": False, "data": response}
 
 
 @group_router.post("/v0/groups/{group_id}")
 async def update_group_timetable(
-    group_id: int, repo: Repo = Depends(get_session)
+    group_id: int,
+    repo: Repo = Depends(get_session),
+    redis: Redis = Depends(get_redis),
 ) -> Dict:
+    """
+    Updates timetable for specific group
+    :param group_id: id of the group to update
+    :param repo: db repo
+    :param redis: redis
+    :return: message or error
+    """
     if not await repo.check_group(group_id=group_id):
         return {"message": "Group not found"}
     try:
         await update_group_lessons(group_id=group_id, repo=repo)
+        await redis.delete(str(group_id))
         return {"message": "Group lessons updated"}
     except Exception as e:
         logging.exception(e)
@@ -81,11 +92,29 @@ async def update_group_timetable(
 
 
 @group_router.post("/v0/groups")
-async def update_groups_request(repo: Repo = Depends(get_session)) -> Dict:
+async def update_groups_request(
+    repo: Repo = Depends(get_session), redis: Redis = Depends(get_redis)
+) -> Dict:
+    """
+    Updates timetable for all groups
+    :param repo: db repo
+    :param redis: redis
+    :return: message or error
+    """
     try:
-        faculties: list[int] = [faculty.id for faculty in await repo.get_faculties()]
-        await update_groups(repo=repo, faculties=faculties)
-        return {"message": "Groups list updated"}
+        if await redis.get("update_all_groups"):
+            return {"message": f"Groups already updated. Timout: {await redis.ttl('update_all_groups')}"}
+        await redis.set("update_all_groups", 1, ex=3600)
+        groups_ids: list[int] = [group.id for group in await repo.get_groups()]
+        try:
+            await update_groups_lessons(repo=repo, groups_ids=groups_ids)
+        except IntegrityError:
+            logging.info("Error while updating groups lessons table. Problem with teachers")
+            await update_teachers(repo=repo)
+            logging.info("Updated teachers")
+            await update_groups_lessons(repo=repo, groups_ids=groups_ids)
+            logging.info("Updated groups lessons")
+        return {"message": "Groups updated"}
     except Exception as e:
         logging.exception(e)
         return {"error": str(e)}
