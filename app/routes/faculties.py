@@ -59,7 +59,7 @@ async def update_faculties_request(
 
 @faculty_router.post("/v0/faculties/groups")
 async def update_faculties_groups(
-        repo: Repo = Depends(get_session), redis: Redis = Depends(get_redis)
+    repo: Repo = Depends(get_session), redis: Redis = Depends(get_redis)
 ):
     try:
         faculties: list[int] = [faculty.id for faculty in await repo.get_faculties()]
