@@ -23,8 +23,11 @@ from db.db import sa_sessionmaker
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    config: Config = load_config()
     logging.info("App started!")
+
+    config: Config = load_config()
+    session_maker = sa_sessionmaker(config.postgres)
+
     scheduler = AsyncIOScheduler(timezone="Europe/Kyiv")
     scheduler.start()
 
@@ -34,7 +37,7 @@ async def lifespan(_: FastAPI):
         minutes=10,
         start_date=datetime.now(),
         kwargs={
-            "session_factory": sa_sessionmaker(config.postgres),
+            "session_factory": session_maker,
             "retry_task": None,
         },
     )
@@ -47,7 +50,7 @@ async def lifespan(_: FastAPI):
         minutes=10,
         start_date=datetime.now(),
         kwargs={
-            "session_factory": sa_sessionmaker(config.postgres),
+            "session_factory": session_maker,
             "retry_task": None,
         },
     )
@@ -64,7 +67,7 @@ async def lifespan(_: FastAPI):
         minutes=10,
         start_date=datetime.now(),
         kwargs={
-            "session_factory": sa_sessionmaker(config.postgres),
+            "session_factory": session_maker,
             "retry_task": None,
         },
     )
@@ -79,7 +82,7 @@ async def lifespan(_: FastAPI):
         day=1,
         start_date=datetime.now(),
         kwargs={
-            "session_factory": sa_sessionmaker(config.postgres),
+            "session_factory": session_maker,
             "retry_task": retry_faculties,
         },
     )
@@ -90,7 +93,7 @@ async def lifespan(_: FastAPI):
         hour=1,
         start_date=datetime.now(),
         kwargs={
-            "session_factory": sa_sessionmaker(config.postgres),
+            "session_factory": session_maker,
             "retry_task": retry_groups,
         },
     )
@@ -103,10 +106,10 @@ async def lifespan(_: FastAPI):
     scheduler.add_job(
         update_groups_lessons_table,
         trigger="cron",
-        hour=3,
+        hour=5,
         start_date=datetime.now(),
         kwargs={
-            "session_factory": sa_sessionmaker(config.postgres),
+            "session_factory": session_maker,
             "retry_task": retry_groups_lessons,
         },
     )
