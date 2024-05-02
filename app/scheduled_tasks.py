@@ -2,7 +2,7 @@ import logging
 
 from apscheduler.job import Job
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 
 from app.utils import (
     update_faculties,
@@ -14,7 +14,7 @@ from db.Repo import Repo
 
 
 async def update_faculties_table(
-    session_factory: sessionmaker, retry_task: Job
+    session_factory: async_sessionmaker[AsyncSession], retry_task: Job
 ) -> None:
     try:
         async with session_factory() as session:
@@ -27,7 +27,9 @@ async def update_faculties_table(
         retry_task.resume()
 
 
-async def update_groups_table(session_factory: sessionmaker, retry_task: Job) -> None:
+async def update_groups_table(
+    session_factory: async_sessionmaker[AsyncSession], retry_task: Job
+) -> None:
     try:
         async with session_factory() as session:
             repo: Repo = Repo(session=session)
@@ -42,7 +44,9 @@ async def update_groups_table(session_factory: sessionmaker, retry_task: Job) ->
         retry_task.resume()
 
 
-async def update_teachers_table(session_factory: sessionmaker, retry_task: Job) -> None:
+async def update_teachers_table(
+    session_factory: async_sessionmaker[AsyncSession], retry_task: Job
+) -> None:
     try:
         async with session_factory() as session:
             repo: Repo = Repo(session=session)
@@ -55,7 +59,7 @@ async def update_teachers_table(session_factory: sessionmaker, retry_task: Job) 
 
 
 async def update_groups_lessons_table(
-    session_factory: sessionmaker, retry_task: Job
+    session_factory: async_sessionmaker[AsyncSession], retry_task: Job
 ) -> None:
     try:
         async with session_factory() as session:
