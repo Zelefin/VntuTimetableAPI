@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import Sequence, Dict
 
 from fastapi import APIRouter, Depends
@@ -6,7 +7,7 @@ from redis.asyncio import Redis
 
 from app.db_session import get_session
 from app.redis_session import get_redis
-from app.utils import update_faculties
+from app.utils import update_faculties, update_groups
 from db.Repo import Repo
 from db.models import Faculty
 
@@ -39,15 +40,32 @@ async def get_faculties_with_groups(
         for faculty in faculties
     ]
 
-    await redis.set(name="faculties_list", value=json.dumps(response), ex=3600)
+    await redis.set(name="faculties_list", value=json.dumps(response), ex=10_800)
 
     return {"cached": False, "data": response}
 
 
 @faculty_router.post("/v0/faculties")
-async def update_faculties_request(repo: Repo = Depends(get_session)) -> Dict:
+async def update_faculties_request(
+    repo: Repo = Depends(get_session), redis: Redis = Depends(get_redis)
+) -> Dict:
     try:
         await update_faculties(repo=repo)
+        await redis.delete("faculties_list")
         return {"message": "Faculties list updated"}
     except Exception as e:
+        return {"error": str(e)}
+
+
+@faculty_router.post("/v0/faculties/groups")
+async def update_faculties_groups(
+        repo: Repo = Depends(get_session), redis: Redis = Depends(get_redis)
+):
+    try:
+        faculties: list[int] = [faculty.id for faculty in await repo.get_faculties()]
+        await update_groups(repo=repo, faculties=faculties)
+        await redis.delete("faculties_list")
+        return {"message": "Groups list updated"}
+    except Exception as e:
+        logging.exception(e)
         return {"error": str(e)}
