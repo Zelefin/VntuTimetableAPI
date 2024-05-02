@@ -1,6 +1,7 @@
 import logging
 
 from apscheduler.job import Job
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
 
 from app.utils import (
@@ -59,13 +60,18 @@ async def update_groups_lessons_table(
     try:
         async with session_factory() as session:
             repo: Repo = Repo(session=session)
-            # we can't skip updating teachers, because each lesson has relationship with teacher
-            # if there is lesson with new teacher it will cause exception
-            await update_teachers(repo=repo)
             groups_ids: list[int] = [group.id for group in await repo.get_groups()]
             await update_groups_lessons(repo=repo, groups_ids=groups_ids)
         retry_task.pause()
+    except IntegrityError:
+        logging.info("Error while updating groups lessons table. Problem with teachers")
+        await update_teachers(repo=repo)
+        logging.info("Updated teachers")
+        await update_groups_lessons(repo=repo, groups_ids=groups_ids)
+        logging.info("Updated groups lessons")
     except Exception as e:
-        logging.info("Error while updating groups lessons table")
+        logging.info(
+            "Error while updating groups lessons table. Problem NOT with teachers"
+        )
         logging.exception(e)
         retry_task.resume()
