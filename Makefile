@@ -2,6 +2,10 @@
 deploy:
 	docker-compose up -d --build
 
+.PHONY: down
+down:
+	docker-compose down
+
 .PHONY: migrate
 migrate:
 	alembic upgrade head
