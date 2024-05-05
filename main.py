@@ -117,7 +117,7 @@ async def lifespan(_: FastAPI):
     scheduler.add_job(
         update_groups_lessons_table,
         trigger="cron",
-        hour=5,
+        hour=7,
         start_date=datetime.now(),
         kwargs={
             "session_factory": session_maker,
