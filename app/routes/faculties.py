@@ -40,7 +40,7 @@ async def get_faculties_with_groups(
         for faculty in faculties
     ]
 
-    await redis.set(name="faculties_list", value=json.dumps(response), ex=10_800)
+    await redis.set(name="faculties", value=json.dumps(response), ex=10_800)
 
     return {"cached": False, "data": response}
 
@@ -50,8 +50,7 @@ async def update_faculties_request(
     repo: Repo = Depends(get_session), redis: Redis = Depends(get_redis)
 ) -> Dict:
     try:
-        await update_faculties(repo=repo)
-        await redis.delete("faculties_list")
+        await update_faculties(repo=repo, redis=redis)
         return {"message": "Faculties list updated"}
     except Exception as e:
         return {"error": str(e)}
@@ -63,8 +62,7 @@ async def update_faculties_groups(
 ):
     try:
         faculties: list[int] = [faculty.id for faculty in await repo.get_faculties()]
-        await update_groups(repo=repo, faculties=faculties)
-        await redis.delete("faculties_list")
+        await update_groups(repo=repo, redis=redis, faculties=faculties)
         return {"message": "Groups list updated"}
     except Exception as e:
         logging.exception(e)

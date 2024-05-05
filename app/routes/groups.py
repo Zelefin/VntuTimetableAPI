@@ -109,14 +109,14 @@ async def update_groups_request(
         await redis.set("update_all_groups", 1, ex=3600)
         groups_ids: list[int] = [group.id for group in await repo.get_groups()]
         try:
-            await update_groups_lessons(repo=repo, groups_ids=groups_ids)
+            await update_groups_lessons(repo=repo, redis=redis, groups_ids=groups_ids)
         except IntegrityError:
             logging.info(
                 "Error while updating groups lessons table. Problem with teachers"
             )
             await update_teachers(repo=repo)
             logging.info("Updated teachers")
-            await update_groups_lessons(repo=repo, groups_ids=groups_ids)
+            await update_groups_lessons(repo=repo, redis=redis, groups_ids=groups_ids)
             logging.info("Updated groups lessons")
         return {"message": "Groups updated"}
     except Exception as e:
