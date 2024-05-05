@@ -1,12 +1,15 @@
 import logging
 from datetime import datetime
 
-from apscheduler.job import Job
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.job import Job  # type: ignore
+from apscheduler.schedulers.asyncio import AsyncIOScheduler  # type: ignore
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from contextlib import asynccontextmanager
+
+from redis.asyncio import Redis
+from redis import asyncio as aioredis
 
 from app.logging_cfg import InterceptHandler
 from app.routes.groups import group_router
@@ -27,6 +30,9 @@ async def lifespan(_: FastAPI):
 
     config: Config = load_config()
     session_maker = sa_sessionmaker(config.postgres)
+    redis: Redis = aioredis.from_url(
+        f"redis://{config.redis.host}:{config.redis.port}/{config.redis.db}"
+    )
 
     scheduler = AsyncIOScheduler(timezone="Europe/Kyiv")
     scheduler.start()
@@ -38,6 +44,7 @@ async def lifespan(_: FastAPI):
         start_date=datetime.now(),
         kwargs={
             "session_factory": session_maker,
+            "redis": redis,
             "retry_task": None,
         },
     )
@@ -51,6 +58,7 @@ async def lifespan(_: FastAPI):
         start_date=datetime.now(),
         kwargs={
             "session_factory": session_maker,
+            "redis": redis,
             "retry_task": None,
         },
     )
@@ -68,6 +76,7 @@ async def lifespan(_: FastAPI):
         start_date=datetime.now(),
         kwargs={
             "session_factory": session_maker,
+            "redis": redis,
             "retry_task": None,
         },
     )
@@ -83,6 +92,7 @@ async def lifespan(_: FastAPI):
         start_date=datetime.now(),
         kwargs={
             "session_factory": session_maker,
+            "redis": redis,
             "retry_task": retry_faculties,
         },
     )
@@ -94,6 +104,7 @@ async def lifespan(_: FastAPI):
         start_date=datetime.now(),
         kwargs={
             "session_factory": session_maker,
+            "redis": redis,
             "retry_task": retry_groups,
         },
     )
@@ -110,6 +121,7 @@ async def lifespan(_: FastAPI):
         start_date=datetime.now(),
         kwargs={
             "session_factory": session_maker,
+            "redis": redis,
             "retry_task": retry_groups_lessons,
         },
     )
@@ -128,7 +140,7 @@ logging.basicConfig(handlers=[InterceptHandler()], level=0, force=True)
 origins = ["*"]
 
 app.add_middleware(
-    CORSMiddleware,
+    CORSMiddleware,  # type: ignore
     allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
