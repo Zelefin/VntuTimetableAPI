@@ -1,10 +1,15 @@
-.PHONY: deploy
-deploy:
+.PHONY: build
+build:
 	docker-compose up -d --build
 
 .PHONY: down
 down:
 	docker-compose down
+
+.PHONY: rebuild
+rebuild:
+	docker-compose down
+	docker-compose up -d --build
 
 .PHONY: migrate
 migrate:
