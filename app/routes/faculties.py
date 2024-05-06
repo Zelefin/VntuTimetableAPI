@@ -24,7 +24,7 @@ async def get_faculties_with_groups(
     :param redis: redis
     :return: list of all faculties and their groups
     """
-    if cached_response := await redis.get(name="faculties_list"):
+    if cached_response := await redis.get(name="faculties"):
         return {"cached": True, "data": json.loads(cached_response)}
 
     faculties: Sequence[Faculty] = await repo.get_faculties()
@@ -53,6 +53,7 @@ async def update_faculties_request(
         await update_faculties(repo=repo, redis=redis)
         return {"message": "Faculties list updated"}
     except Exception as e:
+        logging.exception(msg="Exception while handling post request to /faculties", exc_info=e)
         return {"error": str(e)}
 
 
@@ -65,5 +66,5 @@ async def update_faculties_groups(
         await update_groups(repo=repo, redis=redis, faculties=faculties)
         return {"message": "Groups list updated"}
     except Exception as e:
-        logging.exception(e)
+        logging.exception(msg="Exception while handling post request to /faculties/groups", exc_info=e)
         return {"error": str(e)}
