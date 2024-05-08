@@ -20,12 +20,13 @@ from app.scheduled_tasks import (
     update_groups_table,
     update_groups_lessons_table,
 )
-from configreader import Config, load_config
+from config_reader import Config, load_config
 from db.db import sa_sessionmaker
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    """Lifespan of FastAPI application"""
     logging.info("App started!")
 
     config: Config = load_config()
@@ -112,7 +113,8 @@ async def lifespan(_: FastAPI):
     # so, we don't really need this scheduled job
     # scheduler.add_job(
     #     update_teachers_table, trigger='cron', hour=3, minute=0, start_date=datetime.now(),
-    #     kwargs={"session_factory": sa_sessionmaker(config.postgres), "retry_task": retry_teachers},
+    #     kwargs={"session_factory": sa_sessionmaker(config.postgres),
+    #     "retry_task": retry_teachers},
     # )
     scheduler.add_job(
         update_groups_lessons_table,
@@ -150,4 +152,5 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
+    """Root endpoint"""
     return {"message": "Welcome to VNTU timetable API"}
