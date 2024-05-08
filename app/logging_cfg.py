@@ -35,8 +35,10 @@ class InterceptHandler(logging.Handler):
 
 if PRODUCTION := not DEBUG:
     # Remove default handler or previously added custom handler
-    # Avoids logs to be printed x2 on the terminal or if we want to add new and overwrite previous handler.
-    # Note: If we want to see logs on the terminal alongside the log file - don't remove default handler.
+    # Avoids logs to be printed x2 on the terminal
+    # or if we want to add new and overwrite previous handler.
+    # Note: If we want to see logs on the terminal
+    # alongside the log file - don't remove default handler.
     # logger.remove()
 
     def opener(file, flags):
@@ -51,15 +53,17 @@ if PRODUCTION := not DEBUG:
         """
         return os.open(file, flags, 0o600)
 
-    formatter = "{time:YYYY-MM-DD at HH:mm:ss} | {level: <8} | {name: ^15} | {function: ^15} | {line: >3} | {message}"
+    FORMATTER = ("{time:YYYY-MM-DD at HH:mm:ss} | {level: <8} | {name: ^15} | "
+                 "{function: ^15} | {line: >3} | {message}")
 
     # Note:
-    # 1.If `serialize=True` - creates very detailed messages by converting the logging record to a valid JSON string
+    # 1.If `serialize=True` - creates very detailed messages
+    # by converting the logging record to a valid JSON string
     # It is useful for easier parsing of logs, e.g. analytics or real-time monitoring
     # 2. If we need short logs - remove this argument or set it to `False`.
     logger.add(
         production_log,
-        format=formatter,
+        format=FORMATTER,
         serialize=True,
         diagnose=False,
         rotation="50 MB",
