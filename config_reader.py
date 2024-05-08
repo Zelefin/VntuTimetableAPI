@@ -26,5 +26,6 @@ class Config(BaseSettings):
 
 
 def load_config(env_file=".env") -> Config:
+    """Load config from env file."""
     config = Config(_env_file=env_file)  # type: ignore
     return config
