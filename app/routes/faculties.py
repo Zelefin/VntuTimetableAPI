@@ -49,11 +49,19 @@ async def get_faculties_with_groups(
 async def update_faculties_request(
     repo: Repo = Depends(get_session), redis: Redis = Depends(get_redis)
 ) -> Dict:
+    """
+    Updates faculties list
+    :param repo: db repo
+    :param redis: redis instance
+    :return: message (in case of success) or error (in case of failure)
+    """
     try:
         await update_faculties(repo=repo, redis=redis)
         return {"message": "Faculties list updated"}
     except Exception as e:
-        logging.exception(msg="Exception while handling post request to /faculties", exc_info=e)
+        logging.exception(
+            msg="Exception while handling post request to /faculties", exc_info=e
+        )
         return {"error": str(e)}
 
 
@@ -61,10 +69,18 @@ async def update_faculties_request(
 async def update_faculties_groups(
     repo: Repo = Depends(get_session), redis: Redis = Depends(get_redis)
 ):
+    """
+    Updates faculties groups list.
+    :param repo: db repo.
+    :param redis: redis instance.
+    :return: message (in case of success) or error (in case of failure)
+    """
     try:
         faculties: list[int] = [faculty.id for faculty in await repo.get_faculties()]
         await update_groups(repo=repo, redis=redis, faculties=faculties)
         return {"message": "Groups list updated"}
     except Exception as e:
-        logging.exception(msg="Exception while handling post request to /faculties/groups", exc_info=e)
+        logging.exception(
+            msg="Exception while handling post request to /faculties/groups", exc_info=e
+        )
         return {"error": str(e)}
