@@ -7,10 +7,12 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 class Base(DeclarativeBase):
+    """Base class for all models."""
     pass
 
 
 class Lesson(Base):
+    """Lesson model."""
     __tablename__ = "lessons"
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
@@ -29,10 +31,11 @@ class Lesson(Base):
     dow: Mapped[str] = mapped_column()
     week_num: Mapped[int] = mapped_column()
     added_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=func.now()
+        DateTime(timezone=True), default=func.now()  # pylint: disable=not-callable
     )
 
-    def to_json(self) -> dict:
+    def to_dict(self) -> dict:
+        """Formatting lesson object to dictionary."""
         formatted_lesson: dict = {
             "num": self.num,
             "auditory": self.auditory,
@@ -52,16 +55,18 @@ class Lesson(Base):
 
 
 class Teacher(Base):
+    """Teacher model."""
     __tablename__ = "teachers"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column()
     lessons: Mapped[List["Lesson"]] = relationship(back_populates="teacher")
     added_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=func.now()
+        DateTime(timezone=True), default=func.now()  # pylint: disable=not-callable
     )
 
 
 class Group(Base):
+    """Group model."""
     __tablename__ = "groups"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column()
@@ -69,21 +74,16 @@ class Group(Base):
     faculty_id: Mapped[int] = mapped_column(ForeignKey("faculties.id"))
     faculty: Mapped["Faculty"] = relationship(back_populates="groups")
     added_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=func.now()
+        DateTime(timezone=True), default=func.now()  # pylint: disable=not-callable
     )
 
 
 class Faculty(Base):
+    """Faculty model."""
     __tablename__ = "faculties"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column()
     groups: Mapped[List["Group"]] = relationship(back_populates="faculty")
     added_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=func.now()
+        DateTime(timezone=True), default=func.now()  # pylint: disable=not-callable
     )
-
-    def __str__(self):
-        return f"{self.__class__.__name__} --- {self.name} ({self.id})"
-
-    def __repr__(self):
-        return str(self)
