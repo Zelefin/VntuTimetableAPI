@@ -17,6 +17,7 @@ from db.Repo import Repo
 async def update_faculties_table(
     session_factory: async_sessionmaker[AsyncSession], redis: Redis, retry_task: Job
 ) -> None:
+    """Task to update faculties table."""
     try:
         async with session_factory() as session:
             repo: Repo = Repo(session=session)
@@ -31,6 +32,7 @@ async def update_faculties_table(
 async def update_groups_table(
     session_factory: async_sessionmaker[AsyncSession], redis: Redis, retry_task: Job
 ) -> None:
+    """Task to update groups table."""
     try:
         async with session_factory() as session:
             repo: Repo = Repo(session=session)
@@ -62,6 +64,7 @@ async def update_groups_table(
 async def update_groups_lessons_table(
     session_factory: async_sessionmaker[AsyncSession], redis: Redis, retry_task: Job
 ) -> None:
+    """Task to update groups lessons table."""
     try:
         async with session_factory() as session:
             repo: Repo = Repo(session=session)
