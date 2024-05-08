@@ -57,9 +57,9 @@ async def get_group_timetable(
     for lesson in lessons:
         if lesson.week_num == 1:
             # sorry mypy, but that's for sure a list
-            first_week[days_dict[lesson.dow]]["lessons"].append(lesson.to_json())  # type: ignore
+            first_week[days_dict[lesson.dow]]["lessons"].append(lesson.to_dict())  # type: ignore
         else:
-            second_week[days_dict[lesson.dow]]["lessons"].append(lesson.to_json())  # type: ignore
+            second_week[days_dict[lesson.dow]]["lessons"].append(lesson.to_dict())  # type: ignore
 
     response = {"firstWeek": first_week, "secondWeek": second_week}
     await redis.set(str(group_id), json.dumps(response), ex=10_800)
