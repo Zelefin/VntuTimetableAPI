@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PylintConfigService">
+    <option name="customPylintPath" value="$PROJECT_DIR$/../timetable_bot_v3/.venv/bin/pylint" />
+    <option name="pylintArguments" value="--disable=E1101 --disable=R0903" />
+  </component>
+</project>
