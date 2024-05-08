@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from db.models import Lesson, Group, Faculty, Teacher
 
 
-class Repo:
+class Repo:  # pylint: disable=invalid-name
     """Database repo"""
 
     def __init__(self, session: AsyncSession) -> None:

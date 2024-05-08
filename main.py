@@ -1,12 +1,13 @@
 import logging
 from datetime import datetime
+from contextlib import asynccontextmanager
 
 from apscheduler.job import Job  # type: ignore
 from apscheduler.schedulers.asyncio import AsyncIOScheduler  # type: ignore
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from contextlib import asynccontextmanager
+
 
 from redis.asyncio import Redis
 from redis import asyncio as aioredis

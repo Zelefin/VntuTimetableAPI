@@ -8,7 +8,7 @@ from redis.asyncio import Redis
 from app.db_session import get_session
 from app.redis_session import get_redis
 from app.utils import update_faculties, update_groups
-from db.Repo import Repo
+from db.repo import Repo
 from db.models import Faculty
 
 faculty_router = APIRouter()

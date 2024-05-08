@@ -3,7 +3,7 @@ from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 
 from config_reader import load_config, Config
-from db.Repo import Repo
+from db.repo import Repo
 from db.db import sa_sessionmaker
 
 

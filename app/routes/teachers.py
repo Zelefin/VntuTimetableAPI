@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 
 from app.db_session import get_session
 from app.utils import update_teachers
-from db.Repo import Repo
+from db.repo import Repo
 
 teachers_router = APIRouter()
 

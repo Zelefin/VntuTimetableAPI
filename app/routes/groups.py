@@ -10,7 +10,7 @@ from app.db_session import get_session
 from app.redis_session import get_redis
 from app.utils import update_group_lessons, update_groups_lessons, update_teachers
 from app.misc.gen_date import gen_weeks_dates
-from db.Repo import Repo
+from db.repo import Repo
 from db.models import Lesson
 
 group_router = APIRouter()

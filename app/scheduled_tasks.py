@@ -11,7 +11,7 @@ from app.utils import (
     update_teachers,
     update_groups_lessons,
 )
-from db.Repo import Repo
+from db.repo import Repo
 
 
 async def update_faculties_table(
