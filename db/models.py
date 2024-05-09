@@ -12,6 +12,7 @@ class Base(DeclarativeBase):
 
 class Lesson(Base):
     """Lesson model."""
+
     __tablename__ = "lessons"
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
@@ -55,6 +56,7 @@ class Lesson(Base):
 
 class Teacher(Base):
     """Teacher model."""
+
     __tablename__ = "teachers"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column()
@@ -66,6 +68,7 @@ class Teacher(Base):
 
 class Group(Base):
     """Group model."""
+
     __tablename__ = "groups"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column()
@@ -79,6 +82,7 @@ class Group(Base):
 
 class Faculty(Base):
     """Faculty model."""
+
     __tablename__ = "faculties"
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column()

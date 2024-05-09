@@ -1,10 +1,12 @@
 import logging
 
+from aiohttp import ClientError
 from apscheduler.job import Job  # type: ignore
 from redis.asyncio import Redis
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 
+from app.exceptions.jet_status_exception import JetIQStatusCodeError
 from app.utils import (
     update_faculties,
     update_groups,
@@ -23,9 +25,11 @@ async def update_faculties_table(
             repo: Repo = Repo(session=session)
             await update_faculties(repo=repo, redis=redis)
         retry_task.pause()
-    except Exception as e:
-        logging.info("Error while updating faculties table")
-        logging.exception(e)
+    except JetIQStatusCodeError as e:
+        logging.exception("Error while updating faculties table. Exception: %s", e)
+        retry_task.resume()
+    except ClientError as e:
+        logging.error("Got client error while getting faculties: %s", e)
         retry_task.resume()
 
 
@@ -41,9 +45,14 @@ async def update_groups_table(
             ]
             await update_groups(repo=repo, redis=redis, faculties=faculties)
         retry_task.pause()
-    except Exception as e:
-        logging.info("Error while updating groups table")
-        logging.exception(e)
+    except JetIQStatusCodeError as e:
+        logging.exception("Error while updating groups table. Exception: %s", e)
+        retry_task.resume()
+    except ClientError as e:
+        logging.error(
+            "Got client error while getting groups error: %s",
+            e,
+        )
         retry_task.resume()
 
 
@@ -77,9 +86,15 @@ async def update_groups_lessons_table(
         logging.info("Updated teachers")
         await update_groups_lessons(repo=repo, redis=redis, groups_ids=groups_ids)
         logging.info("Updated groups lessons")
-    except Exception as e:
-        logging.info(
-            "Error while updating groups lessons table. Problem NOT with teachers"
+    except JetIQStatusCodeError as e:
+        logging.exception(
+            "Error while updating groups lessons table. Problem NOT with teachers. Exception: %s",
+            e,
         )
-        logging.exception(e)
+        retry_task.resume()
+    except ClientError as e:
+        logging.error(
+            "Got client error while getting group schedule; error - %s",
+            e,
+        )
         retry_task.resume()

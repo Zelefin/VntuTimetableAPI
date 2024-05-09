@@ -8,7 +8,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 
-
 from redis.asyncio import Redis
 from redis import asyncio as aioredis
 

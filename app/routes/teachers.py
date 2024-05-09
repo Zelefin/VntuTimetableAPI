@@ -1,9 +1,11 @@
 import logging
 from typing import Dict
 
+from aiohttp import ClientError
 from fastapi import APIRouter, Depends
 
 from app.db_session import get_session
+from app.exceptions.jet_status_exception import JetIQStatusCodeError
 from app.utils import update_teachers
 from db.repo import Repo
 
@@ -20,6 +22,9 @@ async def update_teachers_request(repo: Repo = Depends(get_session)) -> Dict:
     try:
         await update_teachers(repo=repo)
         return {"message": "Teachers updated"}
-    except Exception as e:
-        logging.exception(e)
+    except JetIQStatusCodeError as e:
+        logging.exception("/teachers status error: %s", e)
         return {"error": str(e)}
+    except ClientError as e:
+        logging.exception("Got client error on post /teachers endpoint. Exception: %s", e)
+        return {"error": "ClientError"}

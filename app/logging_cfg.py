@@ -53,8 +53,10 @@ if PRODUCTION := not DEBUG:
         """
         return os.open(file, flags, 0o600)
 
-    FORMATTER = ("{time:YYYY-MM-DD at HH:mm:ss} | {level: <8} | {name: ^15} | "
-                 "{function: ^15} | {line: >3} | {message}")
+    FORMATTER = (
+        "{time:YYYY-MM-DD at HH:mm:ss} | {level: <8} | {name: ^15} | "
+        "{function: ^15} | {line: >3} | {message}"
+    )
 
     # Note:
     # 1.If `serialize=True` - creates very detailed messages

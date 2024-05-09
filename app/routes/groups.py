@@ -2,11 +2,13 @@ import json
 import logging
 from typing import Sequence, List, Dict
 
+from aiohttp import ClientError
 from fastapi import APIRouter, Depends
 from redis.asyncio import Redis
 from sqlalchemy.exc import IntegrityError
 
 from app.db_session import get_session
+from app.exceptions.jet_status_exception import JetIQStatusCodeError
 from app.redis_session import get_redis
 from app.utils import update_group_lessons, update_groups_lessons, update_teachers
 from app.misc.gen_date import gen_weeks_dates
@@ -86,9 +88,16 @@ async def update_group_timetable(
         await update_group_lessons(group_id=group_id, repo=repo)
         await redis.delete(str(group_id))
         return {"message": "Group lessons updated"}
-    except Exception as e:
-        logging.exception(e)
+    except JetIQStatusCodeError as e:
+        logging.exception("/groups with group id: %i; status error: %s", group_id, e)
         return {"error": str(e)}
+    except ClientError as e:
+        logging.exception(
+            "Got client error on post /groups endpoint with group id: %i. Exception: %s",
+            group_id,
+            e,
+        )
+        return {"error": "ClientError"}
 
 
 @group_router.post("/v0/groups")
@@ -119,6 +128,9 @@ async def update_groups_request(
             await update_groups_lessons(repo=repo, redis=redis, groups_ids=groups_ids)
             logging.info("Updated groups lessons")
         return {"message": "Groups updated"}
-    except Exception as e:
-        logging.exception(e)
+    except JetIQStatusCodeError as e:
+        logging.exception("/groups status error: %s", e)
         return {"error": str(e)}
+    except ClientError as e:
+        logging.exception("Got client error on post /groups endpoint. Exception: %s", e)
+        return {"error": "ClientError"}
