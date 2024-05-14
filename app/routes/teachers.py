@@ -26,5 +26,7 @@ async def update_teachers_request(repo: Repo = Depends(get_session)) -> Dict:
         logging.exception("/teachers status error: %s", e)
         return {"error": str(e)}
     except ClientError as e:
-        logging.exception("Got client error on post /teachers endpoint. Exception: %s", e)
+        logging.exception(
+            "Got client error on post /teachers endpoint. Exception: %s", e
+        )
         return {"error": "ClientError"}

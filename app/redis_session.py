@@ -11,7 +11,5 @@ config: Config = load_config()
 
 async def get_redis() -> AsyncGenerator[Redis, None]:
     """Function to get redis instance"""
-    redis: Redis = aioredis.from_url(
-        f"redis://{config.redis.host}:{config.redis.port}/{config.redis.db}"
-    )
+    redis: Redis = aioredis.from_url(config.redis.make_connection_string())
     yield redis

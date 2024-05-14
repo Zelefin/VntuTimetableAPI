@@ -8,11 +8,24 @@ class Postgres(BaseSettings):
     user: str
     password: str
 
+    def make_connection_string(self) -> str:
+        """Function to make a connection string to postgres database."""
+        result = (
+            f"postgresql+asyncpg://"
+            f"{self.user}:{self.password}@{self.host}:{self.port}/{self.db}"
+        )
+        return result
+
 
 class Redis(BaseSettings):
     host: str
     port: int
     db: int
+
+    def make_connection_string(self) -> str:
+        """Function to make a connection string to redis."""
+        result = f"redis://{self.host}:{self.port}/{self.db}"
+        return result
 
 
 class Config(BaseSettings):

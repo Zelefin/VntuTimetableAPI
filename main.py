@@ -31,9 +31,7 @@ async def lifespan(_: FastAPI):
 
     config: Config = load_config()
     session_maker = sa_sessionmaker(config.postgres)
-    redis: Redis = aioredis.from_url(
-        f"redis://{config.redis.host}:{config.redis.port}/{config.redis.db}"
-    )
+    redis: Redis = aioredis.from_url(config.redis.make_connection_string())
 
     scheduler = AsyncIOScheduler(timezone="Europe/Kyiv")
     scheduler.start()
