@@ -17,7 +17,7 @@ services:
     restart: always
     expose:
       - "6379"
-    command: redis-server
+     command: ["redis-server", "--appendonly", "no", "--maxmemory", "100mb", "--maxmemory-policy", "allkeys-lru"]
   api:
     build: .
     command: sh -c "alembic upgrade head && python3 -m uvicorn --host 0.0.0.0 main:app"
