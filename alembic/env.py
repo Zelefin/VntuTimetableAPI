@@ -9,7 +9,6 @@ from alembic import context
 
 from config_reader import load_config, Config
 from db.models import Base
-from db.db import make_connection_string
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -34,7 +33,7 @@ target_metadata = Base.metadata
 app_config: Config = load_config()
 
 config.set_main_option(
-    name="sqlalchemy.url", value=make_connection_string(app_config.postgres)
+    name="sqlalchemy.url", value=app_config.postgres.make_connection_string()
 )
 
 
