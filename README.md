@@ -10,3 +10,4 @@ v0 Routes:
 - Post | <b>/groups</b> - update timetable for all groups.
 - Post | <b>/faculties</b> - update faculties list.
 - Post | <b>/faculties/groups</b> - update groups list of every faculty.
+- Post | <b>/teachers</b> - update teachers list.
