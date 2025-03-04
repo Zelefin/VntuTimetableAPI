@@ -21,4 +21,4 @@ def gen_weeks_dates() -> list[dict[int, str]]:
         for week in range(2)
     ]
 
-    return weeks if today.isocalendar()[1] % 2 != 0 else weeks[::-1]
+    return weeks if today.isocalendar()[1] % 2 == 0 else weeks[::-1]
